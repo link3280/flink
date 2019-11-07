@@ -396,7 +396,7 @@ public class ClassLoaderITCase extends TestLogger {
 	public void testProgramWithChildFirstClassLoader() throws IOException, ProgramInvocationException {
 		// We have two files named test-resource in src/resource (parent classloader classpath) and
 		// tmp folders (child classloader classpath) respectively.
-		String childResourceDirName = "child";
+		String childResourceDirName = "child0";
 		String testResourceName = "test-resource";
 		File childResourceDir = FOLDER.newFolder(childResourceDirName);
 		File childResource = new File(childResourceDir.getAbsolutePath() + File.separator + testResourceName);
@@ -429,7 +429,7 @@ public class ClassLoaderITCase extends TestLogger {
 	public void testProgramWithParentFirstClassLoader() throws IOException, ProgramInvocationException {
 		// We have two files named test-resource in src/resource (parent classloader classpath) and
 		// tmp folders (child classloader classpath) respectively.
-		String childResourceDirName = "child";
+		String childResourceDirName = "child1";
 		String testResourceName = "test-resource";
 		File childResourceDir = FOLDER.newFolder(childResourceDirName);
 		File childResource = new File(childResourceDir.getAbsolutePath() + File.separator + testResourceName);
