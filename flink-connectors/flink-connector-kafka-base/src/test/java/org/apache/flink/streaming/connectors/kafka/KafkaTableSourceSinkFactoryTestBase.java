@@ -146,7 +146,8 @@ public abstract class KafkaTableSourceSinkFactoryTestBase extends TestLogger {
 			KAFKA_PROPERTIES,
 			deserializationSchema,
 			StartupMode.SPECIFIC_OFFSETS,
-			specificOffsets);
+			specificOffsets,
+			0L);
 
 		TableSourceValidation.validateTableSource(expected);
 
@@ -214,7 +215,8 @@ public abstract class KafkaTableSourceSinkFactoryTestBase extends TestLogger {
 			KAFKA_PROPERTIES,
 			deserializationSchema,
 			StartupMode.SPECIFIC_OFFSETS,
-			specificOffsets);
+			specificOffsets,
+			0L);
 
 		TableSourceValidation.validateTableSource(expected);
 
@@ -441,7 +443,8 @@ public abstract class KafkaTableSourceSinkFactoryTestBase extends TestLogger {
 		Properties properties,
 		DeserializationSchema<Row> deserializationSchema,
 		StartupMode startupMode,
-		Map<KafkaTopicPartition, Long> specificStartupOffsets);
+		Map<KafkaTopicPartition, Long> specificStartupOffsets,
+		long startupTimestampMillis);
 
 	protected abstract KafkaTableSinkBase getExpectedKafkaTableSink(
 		TableSchema schema,

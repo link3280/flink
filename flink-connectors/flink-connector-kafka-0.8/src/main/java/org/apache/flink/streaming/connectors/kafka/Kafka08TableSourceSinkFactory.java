@@ -58,7 +58,8 @@ public class Kafka08TableSourceSinkFactory extends KafkaTableSourceSinkFactoryBa
 			Properties properties,
 			DeserializationSchema<Row> deserializationSchema,
 			StartupMode startupMode,
-			Map<KafkaTopicPartition, Long> specificStartupOffsets) {
+			Map<KafkaTopicPartition, Long> specificStartupOffsets,
+			long startupTimestampMillis) {
 
 		return new Kafka08TableSource(
 			schema,
