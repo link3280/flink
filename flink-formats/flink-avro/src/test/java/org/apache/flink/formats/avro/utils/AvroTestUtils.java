@@ -100,6 +100,10 @@ public final class AvroTestUtils {
 			// Math.floor(Math.log10(Math.pow(2, 8 * n - 1) - 1))
 			// base-10 digits of precision
 			.setTypeDecimalFixed(new Fixed2(BigDecimal.valueOf(2000, 2).unscaledValue().toByteArray()))
+			// these field would use the new bridged classes
+			.setTypeDateNew(LocalDate.parse("2014-03-01"))
+			.setTypeTimeMillisNew(LocalTime.parse("12:12:12"))
+			.setTypeTimestampMillisNew(DateTime.parse("2014-03-01T12:12:12.321Z"))
 			.build();
 
 		final Row rowUser = new Row(23);
@@ -126,6 +130,9 @@ public final class AvroTestUtils {
 		rowUser.setField(20, 123456L);
 		rowUser.setField(21, BigDecimal.valueOf(2000, 2));
 		rowUser.setField(22, BigDecimal.valueOf(2000, 2));
+		rowUser.setField(23, java.time.LocalDate.of(2014, 3, 1));
+		rowUser.setField(24, java.time.LocalTime.of(12, 12, 12));
+		rowUser.setField(25, java.time.LocalDateTime.of(2014, 3, 1, 12, 12, 12, 321000));
 
 		final Tuple3<Class<? extends SpecificRecord>, SpecificRecord, Row> t = new Tuple3<>();
 		t.f0 = User.class;
@@ -229,6 +236,9 @@ public final class AvroTestUtils {
 		rowUser.setField(20, 123456L);
 		rowUser.setField(21, BigDecimal.valueOf(2000, 2));
 		rowUser.setField(22, BigDecimal.valueOf(2000, 2));
+		rowUser.setField(23, java.time.LocalDate.of(2014, 3, 1));
+		rowUser.setField(24, java.time.LocalTime.of(12, 12, 12));
+		rowUser.setField(25, java.time.LocalDateTime.of(2014, 3, 1, 12, 12, 12, 321000));
 
 		final Tuple3<GenericRecord, Row, Schema> t = new Tuple3<>();
 		t.f0 = user;

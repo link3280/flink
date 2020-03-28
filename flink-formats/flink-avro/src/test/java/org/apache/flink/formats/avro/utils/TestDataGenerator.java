@@ -65,7 +65,10 @@ public class TestDataGenerator {
 				DateTime.parse("2014-03-01T12:12:12.321Z"),
 				123456L,
 				ByteBuffer.wrap(BigDecimal.valueOf(2000, 2).unscaledValue().toByteArray()),
-				new Fixed2(BigDecimal.valueOf(2000, 2).unscaledValue().toByteArray()));
+				new Fixed2(BigDecimal.valueOf(2000, 2).unscaledValue().toByteArray()),
+				LocalDate.parse("2014-03-01"),
+				LocalTime.parse("12:12:12"),
+				DateTime.parse("2014-03-01T12:12:12.321Z"));
 	}
 
 	public static SimpleUser generateRandomSimpleUser(Random rnd) {

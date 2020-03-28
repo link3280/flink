@@ -38,7 +38,10 @@
      {"name": "type_timestamp_millis", "type": {"type": "long", "logicalType": "timestamp-millis"}},
      {"name": "type_timestamp_micros", "type": {"type": "long", "logicalType": "timestamp-micros"}},
      {"name": "type_decimal_bytes", "type": {"type": "bytes", "logicalType": "decimal", "precision": 4, "scale": 2}},
-     {"name": "type_decimal_fixed", "type": {"name": "Fixed2", "size": 2, "type": "fixed", "logicalType": "decimal", "precision": 4, "scale": 2}}
+     {"name": "type_decimal_fixed", "type": {"name": "Fixed2", "size": 2, "type": "fixed", "logicalType": "decimal", "precision": 4, "scale": 2}},
+     {"name": "type_date_new", "type": {"type": "int", "logicalType": "date"}},
+     {"name": "type_time_millis_new", "type": {"type": "int", "logicalType": "time-millis"}},
+     {"name": "type_timestamp_millis_new", "type": {"type": "long", "logicalType": "timestamp-millis"}}
  ]
 },
  {"namespace": "org.apache.flink.formats.avro.generated",
