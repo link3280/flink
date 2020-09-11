@@ -96,7 +96,7 @@ public class FileSystemOptions {
 	public static final ConfigOption<String> STREAMING_SOURCE_CONSUME_START_OFFSET =
 			key("streaming-source.consume-start-offset")
 					.stringType()
-					.defaultValue("1970-00-00")
+					.defaultValue("1970-01-01")
 					.withDescription("Start offset for streaming consuming." +
 							" How to parse and compare offsets depends on your order." +
 							" For create-time and partition-time, should be a timestamp" +

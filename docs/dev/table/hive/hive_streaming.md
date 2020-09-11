@@ -139,7 +139,7 @@ real-time minute level.
     </tr>
     <tr>
         <td><h5>streaming-source.consume-start-offset</h5></td>
-        <td style="word-wrap: break-word;">1970-00-00</td>
+        <td style="word-wrap: break-word;">1970-01-01</td>
         <td>String</td>
         <td>Start offset for streaming consuming. How to parse and compare offsets depends on your order. For create-time and partition-time, should be a timestamp string (yyyy-[m]m-[d]d [hh:mm:ss]). For partition-time, will use partition time extractor to extract time from partition.</td>
     </tr>
