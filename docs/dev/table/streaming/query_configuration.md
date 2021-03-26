@@ -35,7 +35,7 @@ StreamTableEnvironment tableEnv = StreamTableEnvironment.create(env);
 // obtain query configuration from TableEnvironment
 TableConfig tConfig = tableEnv.getConfig();
 // set query parameters
-tConfig.setIdleStateRetentionTime(Time.hours(12), Time.hours(24));
+tConfig.setIdleStateRetention(Duration.ofHours(12));
 
 // define query
 Table result = ...
@@ -66,7 +66,7 @@ val tableEnv = StreamTableEnvironment.create(env)
 // obtain query configuration from TableEnvironment
 val tConfig: TableConfig = tableEnv.getConfig
 // set query parameters
-tConfig.setIdleStateRetentionTime(Time.hours(12), Time.hours(24))
+tConfig.setIdleStateRetention(Duration.ofHours(12))
 
 // define query
 val result: Table = ???
@@ -94,7 +94,7 @@ val stream: DataStream[Row] = result.toAppendStream[Row]
 # use TableConfig in python API
 t_config = TableConfig()
 # set query parameters
-t_config.set_idle_state_retention_time(timedelta(hours=12), timedelta(hours=24))
+t_config.set_idle_state_retention(timedelta(hours=12))
 
 env = StreamExecutionEnvironment.get_execution_environment()
 table_env = StreamTableEnvironment.create(env, t_config)
@@ -135,11 +135,7 @@ The *Idle State Retention Time* parameters define for how long the state of a ke
 
 By removing the state of a key, the continuous query completely forgets that it has seen this key before. If a record with a key, whose state has been removed before, is processed, the record will be treated as if it was the first record with the respective key. For the example above this means that the count of a `sessionId` would start again at `0`.
 
-There are two parameters to configure the idle state retention time:
-- The *minimum idle state retention time* defines how long the state of an inactive key is at least kept before it is removed.
-- The *maximum idle state retention time* defines how long the state of an inactive key is at most kept before it is removed.
-
-The parameters are specified as follows:
+The idle state retention time can be configured as follows:
 
 <div class="codetabs" markdown="1">
 <div data-lang="java" markdown="1">
@@ -147,8 +143,8 @@ The parameters are specified as follows:
 
 TableConfig tConfig = ...
 
-// set idle state retention time: min = 12 hours, max = 24 hours
-tConfig.setIdleStateRetentionTime(Time.hours(12), Time.hours(24));
+// set idle state retention time to 12 hours
+tConfig.setIdleStateRetention(Duration.ofHours(12));
 
 {% endhighlight %}
 </div>
@@ -157,8 +153,8 @@ tConfig.setIdleStateRetentionTime(Time.hours(12), Time.hours(24));
 
 val tConfig: TableConfig = ???
 
-// set idle state retention time: min = 12 hours, max = 24 hours
-tConfig.setIdleStateRetentionTime(Time.hours(12), Time.hours(24))
+// set idle state retention time to 12 hours
+tConfig.setIdleStateRetention(Duration.ofHours(12))
 
 {% endhighlight %}
 </div>
@@ -167,13 +163,11 @@ tConfig.setIdleStateRetentionTime(Time.hours(12), Time.hours(24))
 
 t_config = ...  # type: TableConfig
 
-# set idle state retention time: min = 12 hours, max = 24 hours
-t_config.set_idle_state_retention_time(timedelta(hours=12), timedelta(hours=24))
+# set idle state retention time to 12 hours
+t_config.set_idle_state_retention(timedelta(hours=12))
 
 {% endhighlight %}
 </div>
 </div>
-
-Cleaning up state requires additional bookkeeping which becomes less expensive for larger differences of `minTime` and `maxTime`. The difference between `minTime` and `maxTime` must be at least 5 minutes.
 
 {% top %}
