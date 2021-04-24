@@ -35,6 +35,7 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.fs.viewfs.ViewFileSystem;
 import org.apache.hadoop.hdfs.DistributedFileSystem;
+import org.apache.hadoop.hdfs.protocol.LocatedBlocks;
 import org.apache.hadoop.util.VersionInfo;
 
 import java.io.FileNotFoundException;
@@ -53,7 +54,9 @@ import static org.apache.flink.util.Preconditions.checkNotNull;
 @Internal
 class HadoopRecoverableFsDataOutputStream extends RecoverableFsDataOutputStream {
 
-    private static final long LEASE_TIMEOUT = 100_000L;
+	private static final long LEASE_RECOVERY_TIMEOUT = 9_000_000L;
+
+	private static final long BLOCK_RECOVERY_TIMEOUT = 30_000L;
 
     private static Method truncateHandle;
 
@@ -160,7 +163,11 @@ class HadoopRecoverableFsDataOutputStream extends RecoverableFsDataOutputStream 
 
         ensureTruncateInitialized();
 
-        revokeLeaseByFileSystem(fileSystem, path);
+		boolean isLeaseReleased = revokeLeaseByFileSystem(fileSystem, path);
+		Preconditions.checkState(isLeaseReleased,
+			"Failed to release lease on file `{}` in {} ms",
+			path.toString(),
+			LEASE_RECOVERY_TIMEOUT);
 
         // truncate back and append
         boolean truncated;
@@ -170,12 +177,16 @@ class HadoopRecoverableFsDataOutputStream extends RecoverableFsDataOutputStream 
             throw new IOException("Problem while truncating file: " + path, e);
         }
 
-        if (!truncated) {
-            // Truncate did not complete immediately, we must wait for
-            // the operation to complete and release the lease.
-            revokeLeaseByFileSystem(fileSystem, path);
-        }
-    }
+		if (!truncated) {
+			// Truncate does not complete immediately if block recovery is needed,
+			// thus wait for block recovery
+			boolean isBlockRecovered = waitForBlockRecovery(fileSystem, path);
+			Preconditions.checkState(isBlockRecovered,
+				"Failed to recover blocks for file {} in {} ms",
+				path.toString(),
+				BLOCK_RECOVERY_TIMEOUT);
+		}
+	}
 
     private static void ensureTruncateInitialized() throws FlinkRuntimeException {
         if (HadoopUtils.isMinHadoopVersion(2, 7) && truncateHandle == null) {
@@ -338,6 +349,10 @@ class HadoopRecoverableFsDataOutputStream extends RecoverableFsDataOutputStream 
      * <p>The lease of the file we are resuming writing/committing to may still belong to the
      * process that failed previously and whose state we are recovering.
      *
+     * <p>The recovery process would be fast in most cases, but in case of the
+     * file's primary node crashes, the NameNode must wait for a socket timeout
+     * which is 10 min by default.
+     *
      * @param path The path to the file we want to resume writing to.
      */
     private static boolean waitUntilLeaseIsRevoked(final FileSystem fs, final Path path)
@@ -347,17 +362,43 @@ class HadoopRecoverableFsDataOutputStream extends RecoverableFsDataOutputStream 
         final DistributedFileSystem dfs = (DistributedFileSystem) fs;
         dfs.recoverLease(path);
 
-        final Deadline deadline = Deadline.now().plus(Duration.ofMillis(LEASE_TIMEOUT));
+		final Deadline deadline = Deadline.now().plus(Duration.ofMillis(LEASE_RECOVERY_TIMEOUT));
 
-        boolean isClosed = dfs.isFileClosed(path);
-        while (!isClosed && deadline.hasTimeLeft()) {
-            try {
-                Thread.sleep(500L);
-            } catch (InterruptedException e1) {
-                throw new IOException("Recovering the lease failed: ", e1);
+		boolean isClosed = dfs.isFileClosed(path);
+		while (!isClosed && deadline.hasTimeLeft()) {
+			try {
+				Thread.sleep(500L);
+			} catch (InterruptedException e1) {
+				throw new IOException("Recovering the lease failed: ", e1);
+			}
+			isClosed = dfs.isFileClosed(path);
+		}
+		return isClosed;
+	}
+
+	private static boolean waitForBlockRecovery(final FileSystem fs, final Path path)
+		throws IOException {
+		Preconditions.checkState(fs instanceof DistributedFileSystem);
+
+		final DistributedFileSystem dfs = (DistributedFileSystem) fs;
+
+		final Deadline deadline = Deadline.now().plus(Duration.ofMillis(BLOCK_RECOVERY_TIMEOUT));
+
+		boolean success = false;
+		while (deadline.hasTimeLeft()) {
+			LocatedBlocks blocks =
+				dfs.getClient().getLocatedBlocks(path.toString(), 0, Long.MAX_VALUE);
+			boolean noLastBlock = blocks.getLastLocatedBlock() == null;
+			if (!blocks.isUnderConstruction() &&
+				(noLastBlock || blocks.isLastBlockComplete())) {
+				success = true;
+				break;
+			}
+			try {
+			    Thread.sleep(500L);
+			} catch (InterruptedException ignored) {
             }
-            isClosed = dfs.isFileClosed(path);
-        }
-        return isClosed;
-    }
+		}
+		return success;
+	}
 }
