@@ -388,7 +388,11 @@ class HadoopRecoverableFsDataOutputStream extends RecoverableFsDataOutputStream 
         boolean success = false;
         while (deadline.hasTimeLeft()) {
             LocatedBlocks blocks =
-                    dfs.getClient().getLocatedBlocks(path.toString(), 0, Long.MAX_VALUE);
+                    dfs.getClient()
+                            .getLocatedBlocks(
+                                    Path.getPathWithoutSchemeAndAuthority(path).toString(),
+                                    0,
+                                    Long.MAX_VALUE);
             boolean noLastBlock = blocks.getLastLocatedBlock() == null;
             if (!blocks.isUnderConstruction() && (noLastBlock || blocks.isLastBlockComplete())) {
                 success = true;
